@@ -1,4 +1,5 @@
 import {generatePhotos} from './data.js';
 import {renderGallery} from './gallery.js';
-import './form.js';
+import './hashtags.js';
+import './slider.js';
 renderGallery(generatePhotos());
