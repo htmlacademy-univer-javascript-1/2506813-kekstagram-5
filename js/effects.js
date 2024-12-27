@@ -1,219 +1,114 @@
+const DEFAULT_EFFECT_LEVEL = 100;
+
+const Slider = {
+  MIN: 10,
+  MAX: 100,
+  STEP: 10,
+};
+
+const sliderElement = document.querySelector('.effect-level__slider');
+const sliderUpload = document.querySelector('.img-upload__effect-level');
+const currentSlider = document.querySelector('.effect-level__value');
+const filterRadios = document.querySelectorAll('.effects__item');
+const picture = document.querySelector('.img-upload__preview img');
+
+let currentRadio = document.querySelector('.effects__radio').value;
+
+currentSlider.value = DEFAULT_EFFECT_LEVEL;
+
 const Effects = {
-  NONE: {
-    range: {
-      min: 0,
-      max: 1,
-    },
-    start: 1,
+  none: 0,
+  chrome: {
+    filter: 'grayscale',
+    range: {min: 0, max: 1.0},
     step: 0.1,
-    connect: 'lower',
-    format: {
-      to: function (value) {
-        return value;
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
-  },
-  CHROME: {
-    range: {
-      min: 0,
-      max: 1
-    },
-    start: 1,
+    measurementUnit: ''},
+  sepia: {
+    filter: 'sepia',
+    range: {min: 0, max: 1.0},
     step: 0.1,
-    format: {
-      to: function (value) {
-        return value.toFixed(1);
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
-  },
-  SEPIA: {
-    range: {
-      min: 0,
-      max: 1
-    },
-    start: 1,
-    step: 0.1,
-    format: {
-      to: function (value) {
-        return value.toFixed(1);
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
-  },
-  MARVIN: {
-    range: {
-      min: 0,
-      max: 100
-    },
-    start: 100,
+    measurementUnit: ''},
+  marvin: {
+    filter: 'invert',
+    range: {min: 0, max: 100},
     step: 1,
-    format: {
-      to: function (value) {
-        return `${value}%`;
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
-  },
-  PHOBOS: {
-    range: {
-      min: 0,
-      max: 3
-    },
-    start: 3,
+    measurementUnit: '%'},
+  phobos: {
+    filter: 'blur',
+    range: {min: 0, max: 3.0},
     step: 0.1,
-    format: {
-      to: function (value) {
-        return `${value.toFixed(1)}px`;
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
-  },
-  HEAT: {
-    range: {
-      min: 1,
-      max: 3
-    },
-    start: 3,
+    measurementUnit: 'px'},
+  heat: {
+    filter: 'brightness',
+    range: {min: 1, max: 3.0},
     step: 0.1,
-    format: {
-      to: function (value) {
-        return value.toFixed(1);
+    measurementUnit: ''}
+};
+
+const sliderConnector = () => {
+  if (currentRadio !== 'none') {
+    const effect = Effects[currentRadio];
+    picture.style.filter = `${effect.filter}(${sliderElement.noUiSlider.get()}${effect.measurementUnit})`;
+    currentSlider.value = `${parseFloat(sliderElement.noUiSlider.get())}${effect.measurementUnit}`;
+  } else {
+    picture.style.filter = '';
+  }
+};
+
+const changeSlider = (newEffect) => {
+  const effect = Effects[newEffect];
+  if(effect !== 0){
+    sliderElement.noUiSlider.updateOptions({
+      range: {
+        min: effect.range.min,
+        max: effect.range.max,
       },
-      from: function (value) {
-        return parseFloat(value);
-      }
-    }
+      start: effect.range.max,
+      step: effect.step
+    });
+    sliderUpload.classList.remove('visually-hidden');
+    sliderConnector();
+  } else{
+    sliderUpload.classList.add('visually-hidden');
+    picture.style.filter = '';
   }
 };
 
-const MIN_SCALE = 25;
-const MAX_SCALE = 100;
-const STEP_SCALE = 25;
-
-let filterType = 'none';
-
-const form = document.querySelector('.img-upload__form');
-
-const zoomOutButtonElement = form.querySelector('.scale__control--smaller');
-const zoomButtonElement = form.querySelector('.scale__control--bigger');
-const scaleValueElement = form.querySelector('.scale__control--value');
-const imageElement = form.querySelector('.img-upload__preview img');
-
-const filterButtonsContainerElement = form.querySelector('.effects__list');
-const sliderElement = form.querySelector('.effect-level__slider');
-const filterValueElement = form.querySelector('.effect-level__value');
-
-const imageZoomOutHandler = () => {
-  let scaleValue = parseInt(scaleValueElement.value, 10);
-  if (scaleValue > MIN_SCALE) {
-    scaleValue -= STEP_SCALE;
-    scaleValueElement.value = `${scaleValue}%`;
-    imageElement.style.transform = `scale(0.${scaleValue})`;
-  }
+const onNoUiSliderChange = () => {
+  sliderConnector();
 };
 
-const imageZoomInHandler = () => {
-  let scaleValue = parseInt(scaleValueElement.value, 10);
-  if (scaleValue < MAX_SCALE) {
-    scaleValue += STEP_SCALE;
-    scaleValueElement.value = `${scaleValue}%`;
-    imageElement.style.transform = (scaleValue === MAX_SCALE) ? 'scale(1)' : `scale(0.${scaleValue})`;
-  }
+const onRadioChange = (evt) =>{
+  currentRadio = evt.currentTarget.querySelector('.effects__radio').value;
+  changeSlider(currentRadio);
 };
 
-const addEventListenerImage = () => {
-  zoomOutButtonElement.addEventListener('click', imageZoomOutHandler);
-  zoomButtonElement.addEventListener('click', imageZoomInHandler);
-};
-
-const removeEventListenerImage = () => {
-  zoomOutButtonElement.removeEventListener('click', imageZoomOutHandler);
-  zoomButtonElement.removeEventListener('click', imageZoomInHandler);
-};
-
-const customiseFilter = (filterID) => {
-  let filterClass;
-  let options;
-  switch (filterID) {
-    case 'effect-none':
-      filterClass = 'effects__preview--none';
-      filterType = 'none';
-      sliderElement.setAttribute('hidden', true);
-      options = Effects.NONE;
-      break;
-    case 'effect-chrome':
-      filterClass = 'effects__preview--chrome';
-      filterType = 'grayscale';
-      sliderElement.removeAttribute('hidden', true);
-      options = Effects.CHROME;
-      break;
-    case 'effect-sepia':
-      filterClass = 'effects__preview--sepia';
-      filterType = 'sepia';
-      sliderElement.removeAttribute('hidden', true);
-      options = Effects.SEPIA;
-      break;
-    case 'effect-marvin':
-      filterClass = 'effects__preview--marvin';
-      filterType = 'invert';
-      sliderElement.removeAttribute('hidden', true);
-      options = Effects.MARVIN;
-      break;
-    case 'effect-phobos':
-      filterClass = 'effects__preview--phobos';
-      filterType = 'blur';
-      sliderElement.removeAttribute('hidden', true);
-      options = Effects.PHOBOS;
-      break;
-    case 'effect-heat':
-      filterClass = 'effects__preview--heat';
-      filterType = 'brightness';
-      sliderElement.removeAttribute('hidden', true);
-      options = Effects.HEAT;
-      break;
-  }
-  imageElement.className = '';
-  imageElement.classList.add(filterClass);
-  sliderElement.noUiSlider.updateOptions(options);
-};
-
-const filterChangeHandler = (evt) => {
-  if (evt.target.closest('.effects__item')) {
-    customiseFilter(evt.target.id);
-  }
-};
-
-const addFilter = () => {
-  filterValueElement.value = 1;
-  filterType = 'none';
-  noUiSlider.create(sliderElement, Effects.NONE);
-  sliderElement.setAttribute('hidden', true);
-  filterButtonsContainerElement.addEventListener('change', filterChangeHandler);
-
-  sliderElement.noUiSlider.on('update', () => {
-    filterValueElement.value = parseFloat(sliderElement.noUiSlider.get());
-    imageElement.style.filter = (filterType !== 'none') ? `${filterType}(${sliderElement.noUiSlider.get()})` : '';
+const resetFilters = () =>{
+  filterRadios.forEach((filter) => {
+    filter.removeEventListener('change', onRadioChange);
   });
+
+  picture.style.filter = 'none';
+  sliderElement.noUiSlider.off('change', onNoUiSliderChange);
 };
 
-const removeFilters = () => {
-  filterButtonsContainerElement.removeEventListener('change', filterChangeHandler);
-  imageElement.className = '';
-  imageElement.style.transform = 'scale(1)';
-  document.querySelector('#effect-none').checked = true;
-  sliderElement.noUiSlider.destroy();
+const initRadios = () =>{
+  sliderElement.noUiSlider.on('change', onNoUiSliderChange);
+  sliderUpload.classList.add('visually-hidden');
+  filterRadios.forEach((filter) => {
+    filter.addEventListener('change', onRadioChange);
+  });
+  picture.style.filter = 'none';
 };
 
-export {form, addEventListenerImage, removeEventListenerImage, addFilter, removeFilters, scaleValueElement};
+noUiSlider.create(sliderElement, {
+  range: {
+    min: Slider.MIN,
+    max: Slider.MAX
+  },
+  start: Slider.MAX,
+  step: Slider.STEP,
+  connect: 'lower',
+});
+
+export {initRadios, resetFilters};
