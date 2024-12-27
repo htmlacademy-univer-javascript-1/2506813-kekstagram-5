@@ -1,17 +1,23 @@
-function renderMiniatures(photos, picturesContainer) {
-  const photoTemplate = document.querySelector('#picture')
-    .content
-    .querySelector('.picture');
-  const photosFragment = document.createDocumentFragment();
-  photos.forEach(({url, description, likes, comments, id}) => {
-    const newPhoto = photoTemplate.cloneNode(true);
-    newPhoto.querySelector('.picture__img').src = url;
-    newPhoto.querySelector('.picture__img').alt = description;
-    newPhoto.querySelector('.picture__likes').textContent = likes;
-    newPhoto.querySelector('.picture__comments').textContent = comments.length;
-    newPhoto.dataset.pictureId = id;
-    photosFragment.appendChild(newPhoto);
+import { openBigPictureWindow } from './BigPicture.js';
+
+const picturesContainerElement = document.querySelector('.pictures');
+const pictureTemplate = document.querySelector('#picture').content.querySelector('a');
+
+const renderPhotosList = (photosList) => {
+  const photosListFragment = document.createDocumentFragment();
+
+  photosList.forEach(({url, likes, comments, description}) => {
+    const photoElement = pictureTemplate.cloneNode(true);
+    photoElement.querySelector('img').setAttribute('src', url);
+    photoElement.querySelector('.picture__likes').textContent = likes;
+    photoElement.querySelector('.picture__comments').textContent = comments.length;
+    photoElement.querySelector('img').addEventListener('click', () => {
+      openBigPictureWindow({url, likes, comments, description});
+    });
+    photosListFragment.append(photoElement);
   });
-  picturesContainer.appendChild(photosFragment);
-}
-export {renderMiniatures};
+
+  picturesContainerElement.append(photosListFragment);
+};
+
+export {renderPhotosList};
