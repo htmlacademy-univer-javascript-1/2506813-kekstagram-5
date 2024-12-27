@@ -1,29 +1,33 @@
-const Urls = {
-  GET: 'https://29.javascript.htmlacademy.pro/kekstagram/data',
-  POST: 'https://29.javascript.htmlacademy.pro/kekstagram/data',
+const BASE_URL = 'https://29.javascript.htmlacademy.pro/kekstagram/data';
+const Route = {
+  GET_DATA: '/data',
+  SEND_DATA: '/',
+};
+const Method = {
+  GET: 'GET',
+  POST: 'POST',
+};
+const ErrorText = {
+  GET_DATA: 'Не удалось загрузить данные. Попробуйте обновить страницу',
+  SEND_DATA: 'Не удалось отправить форму. Попробуйте ещё раз',
 };
 
-const getData = (onSuccess, onFail) => {
-  fetch(Urls.GET)
-    .then((response) => response.json())
-    .then((photos) => onSuccess(photos))
-    .catch(() => onFail('При загрузке данных с сервера произошла ошибка'));
-};
 
-const sendData = (onSuccess, onFail, body) => {
-  fetch(Urls.POST,
-    {
-      method: 'POST',
-      body,
-    }
-  ).then((response) => {
-    if (response.ok) {
-      onSuccess();
-    } else {
-      onFail('Не удалось опубликовать');
-    }
-  })
-    .catch(() => onFail('Не удалось опубликовать'));
-};
+const load = (route, errorText, method = Method.GET, body = null) =>
+  fetch(`${BASE_URL}${route}`, { method, body })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error();
+      }
+      return response.json();
+    })
+    .catch(() => {
+      throw new Error(errorText);
+    });
 
-export {getData, sendData};
+const getData = () => load(Route.GET_DATA, ErrorText.GET_DATA);
+
+const sendData = (body) =>
+  load(Route.SEND_DATA, ErrorText.SEND_DATA, Method.POST, body);
+
+export { getData, sendData };
