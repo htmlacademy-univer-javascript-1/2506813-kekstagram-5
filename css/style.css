@@ -1405,6 +1405,15 @@ main {
   overflow: hidden;
 }
 
+.img-upload__field-wrapper--error {
+  background-color: #f32c2c;
+  color: #ffffff;
+  font-size: 12px;
+  margin-top: -20px;
+  z-index: 10000;
+  position: relative;
+}
+
 .hidden {
   display: none;
 }
