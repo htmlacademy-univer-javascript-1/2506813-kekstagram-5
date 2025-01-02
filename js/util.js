@@ -1,28 +1,40 @@
-const getRandomNumber = (a, b) => {
-  const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
-  const upper = Math.floor(Math.max(Math.abs(a), Math.abs(b)));
-  return Math.floor(Math.random() * (upper - lower + 1) + lower);
+const getRandomInteger = (a, b) => {
+  const lower = Math.ceil(Math.min(a, b));
+  const upper = Math.floor(Math.max(a, b));
+  const result = Math.random() * (upper - lower + 1) + lower;
+
+  return Math.floor(result);
 };
 
-const isEscapeKey = (evt) => evt.keyCode === 27;
+const createRandomIdFromRangeGenerator = (min, max) => {
+  const previousValues = [];
 
-const checkForRepeats = (list) => {
-  const containerForСomparison = {};
-  for (const element of list) {
-    if (containerForСomparison[element]) {
-      return true;
+  return function () {
+    let currentValue = getRandomInteger(min, max);
+
+    while (previousValues.includes(currentValue)) {
+      currentValue = getRandomInteger(min, max);
     }
-    containerForСomparison[element] = 1;
-  }
-  return false;
+
+    previousValues.push(currentValue);
+
+    return currentValue;
+  };
 };
 
-const debounce = (callback, timeoutDelay = 500) => {
+const isEscKey = (evt) => evt.key === 'Escape';
+
+const createImageUrl = (id, derictory, format) => derictory + id + format;
+
+function debounce (callback, timeoutDelay = 500) {
   let timeoutId;
   return (...rest) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
   };
-};
+}
 
-export {getRandomNumber, isEscapeKey, checkForRepeats, debounce};
+const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+
+export {getRandomInteger, createRandomIdFromRangeGenerator, createImageUrl, isEscKey, debounce, shuffle};
