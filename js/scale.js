@@ -30,3 +30,5 @@ smallButtonElement.addEventListener('click', onSmallButton);
 bigButtonElement.addEventListener('click', onBigButton);
 
 export { resetScale };
+
+
