@@ -4,25 +4,31 @@ const body = document.querySelector('body');
 
 function hideMessage() {
   const messageElement = document.querySelector('.success') || document.querySelector('.error');
-  messageElement.remove();
+  if (messageElement) {
+    messageElement.remove();
+  }
   document.removeEventListener('keydown', onDocumentKeydown);
   body.removeEventListener('click', onBodyClick);
 }
 
+function handleHideMessage() {
+  hideMessage();
+}
+
 function onBodyClick(evt) {
   if (
-    evt.target.closet('.success__inner') ||
-    evt.target.closet('.error__inner')
+    evt.target.closest('.success__inner') ||
+    evt.target.closest('.error__inner')
   ) {
     return;
   }
-  hideMessage();
+  handleHideMessage();
 }
 
 function onDocumentKeydown(evt) {
   if (evt.key === 'Escape') {
     evt.preventDefault();
-    hideMessage();
+    handleHideMessage();
   }
 }
 
@@ -30,7 +36,7 @@ const showMessage = (messageElement, closeButtonClass) => {
   body.append(messageElement);
   document.addEventListener('keydown', onDocumentKeydown);
   body.addEventListener('click', onBodyClick);
-  messageElement.querySelector(closeButtonClass).addEventListener('click', hideMessage);
+  messageElement.querySelector(closeButtonClass).addEventListener('click', handleHideMessage);
 };
 
 const showSuccessMessage = () => {
